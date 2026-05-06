@@ -1,167 +1,1577 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dev App – Prototype</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jet Fuel Analytics - Executive Intelligence Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0f1923;
+            --bg-secondary: #1a2332;
+            --bg-tertiary: #242f3e;
+            --border-color: #2a3a4a;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --critical: #ef4444;
+            --elevated: #f59e0b;
+            --normal: #22c55e;
+            --info: #3b82f6;
+            --accent: #06b6d4;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            overflow-x: hidden;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1a2332 0%, #242f3e 100%);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, var(--accent), var(--info));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--normal);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            background-color: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 2rem;
+            display: flex;
+            gap: 0;
+        }
+
+        .nav-tab {
+            padding: 1rem 1.5rem;
+            border: none;
+            background: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-tab:hover {
+            color: var(--text-primary);
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        .nav-tab.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        /* Main Container */
+        .container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        /* Section A: Executive Summary */
+        .executive-summary {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .summary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .summary-date {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+
+        .severity-badge {
+            background-color: var(--critical);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+        }
+
+        .news-ticker {
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            max-height: 120px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .ticker-items {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            animation: scroll-up 20s linear infinite;
+        }
+
+        @keyframes scroll-up {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-100%); }
+        }
+
+        .ticker-item {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        .ticker-category {
+            font-weight: 600;
+            min-width: 140px;
+            color: var(--accent);
+        }
+
+        .ticker-text {
+            color: var(--text-secondary);
+            flex: 1;
+        }
+
+        .ticker-status {
+            font-weight: 600;
+            color: var(--critical);
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .metric-card {
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .metric-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .metric-detail {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* Section B: EU Jet Fuel Analysis */
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(180deg, var(--accent), var(--info));
+            border-radius: 2px;
+        }
+
+        .supply-balance-section {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .subsection-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .supply-bar-container {
+            margin-bottom: 1rem;
+        }
+
+        .supply-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .supply-bar {
+            width: 100%;
+            height: 40px;
+            background-color: var(--bg-tertiary);
+            border-radius: 0.375rem;
+            overflow: hidden;
+            display: flex;
+            border: 1px solid var(--border-color);
+        }
+
+        .bar-segment {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .bar-consumption {
+            background: linear-gradient(90deg, #ef5350, #ef4444);
+            width: 50%;
+        }
+
+        .bar-domestic {
+            background: linear-gradient(90deg, #f97316, #ea580c);
+            width: 39.4%;
+        }
+
+        .bar-seaborne {
+            background: linear-gradient(90deg, #3b82f6, #2563eb);
+            width: 15.6%;
+        }
+
+        .supply-note {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: var(--bg-tertiary);
+            border-radius: 0.375rem;
+            border-left: 3px solid var(--accent);
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-container {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+        }
+
+        .import-source-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .import-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background-color: var(--bg-tertiary);
+            border-radius: 0.375rem;
+            border-left: 3px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .import-item:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+            border-left-color: var(--info);
+        }
+
+        .import-source {
+            display: flex;
+            justify-content: space-between;
+            flex: 1;
+        }
+
+        .import-name {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .import-change {
+            font-size: 0.8rem;
+            margin-left: 1rem;
+            color: var(--critical);
+        }
+
+        .import-stats {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .import-volume {
+            text-align: right;
+            min-width: 100px;
+        }
+
+        .import-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .import-percent {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* Port Arrival Table */
+        .ports-section {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            overflow-x: auto;
+        }
+
+        .ports-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .ports-table thead {
+            background-color: var(--bg-tertiary);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .ports-table th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+
+        .ports-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .ports-table tbody tr:hover {
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+
+        .port-name {
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.25rem;
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-critical {
+            background-color: rgba(239, 68, 68, 0.2);
+            color: var(--critical);
+        }
+
+        .status-elevated {
+            background-color: rgba(245, 158, 11, 0.2);
+            color: var(--elevated);
+        }
+
+        .status-normal {
+            background-color: rgba(34, 197, 94, 0.2);
+            color: var(--normal);
+        }
+
+        /* Tanker Pipeline */
+        .tanker-pipeline {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .pipeline-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .pipeline-card {
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .pipeline-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .pipeline-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .pipeline-note {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: var(--bg-tertiary);
+            border-radius: 0.375rem;
+            border-left: 3px solid var(--elevated);
+        }
+
+        /* ARA Stock Chart */
+        .ara-stock-section {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        /* Section C Placeholder */
+        .section-placeholder {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .placeholder-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .placeholder-card {
+            background-color: var(--bg-tertiary);
+            border: 1px dashed var(--border-color);
+            border-radius: 0.5rem;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .placeholder-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .placeholder-text {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* Footer */
+        .footer {
+            background-color: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 1.5rem 2rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .footer-left {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .confidence-indicator {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-right: 0.25rem;
+        }
+
+        .confidence-high {
+            background-color: var(--normal);
+        }
+
+        .confidence-low {
+            background-color: var(--elevated);
+        }
+
+        .confidence-medium {
+            background-color: var(--info);
+        }
+
+        .roadmap-toggle {
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .roadmap-toggle:hover {
+            background-color: var(--bg-tertiary);
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .roadmap-content {
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .roadmap-content.active {
+            max-height: 500px;
+        }
+
+        .roadmap-item {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .roadmap-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .roadmap-tier {
+            font-weight: 600;
+            color: var(--accent);
+            min-width: 120px;
+        }
+
+        .roadmap-description {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .metrics-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .nav-tabs {
+                padding: 0 1rem;
+                overflow-x: auto;
+            }
+
+            .footer {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .supply-bar {
+                height: 30px;
+            }
+
+            .bar-segment {
+                font-size: 0.7rem;
+            }
+
+            .ports-table {
+                font-size: 0.8rem;
+            }
+
+            .ports-table th, .ports-table td {
+                padding: 0.75rem 0.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <div class="logo">Jet Fuel Analytics</div>
+        </div>
+        <div class="header-right">
+            <span>Analysis: 09:52:23</span>
+            <div class="live-indicator">
+                <span>Live</span>
+                <div class="live-dot"></div>
+            </div>
+        </div>
+    </div>
 
-  <!-- ============================================================
-       HEADER – Edit the app name and tagline here
-  ============================================================ -->
-  <header>
-    <h1>Dev App</h1>
-    <p class="subtitle">Collaborative Development Prototype &mdash; Open for contributions</p>
-  </header>
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs">
+        <button class="nav-tab active" data-tab="overview">Overview</button>
+        <button class="nav-tab" data-tab="timeline">Crisis Timeline</button>
+        <button class="nav-tab" data-tab="news">News Digest</button>
+        <button class="nav-tab" data-tab="tracking">Vessel Tracking</button>
+        <button class="nav-tab" data-tab="scenarios">Scenario Analysis</button>
+        <button class="nav-tab" data-tab="forecast">Fuel Forecast</button>
+    </div>
 
-  <!-- ============================================================
-       NAVIGATION – TODO: Add links to your main sections
-  ============================================================ -->
-  <nav class="prototype-nav">
-    <a href="#overview">Overview</a>
-    <a href="#features">Features</a>
-    <a href="#tasks">Task Board</a>
-    <a href="#notes">Shared Notes</a>
-    <a href="#team">Team</a>
-  </nav>
+    <!-- Main Content -->
+    <div class="tab-panel active" id="panel-overview">
+    <div class="container">
+        <!-- SECTION A: Executive Summary -->
+        <div class="executive-summary">
+            <div class="summary-header">
+                <div>
+                    <div class="summary-date">Wednesday, 6 May 2026</div>
+                </div>
+                <div class="severity-badge">CRITICAL</div>
+            </div>
 
-  <main>
+            <!-- News Ticker -->
+            <div class="news-ticker" id="newsTicker">
+                <div class="ticker-items">
+                    <div class="ticker-item">
+                        <span class="ticker-category">Geopolitics:</span>
+                        <span class="ticker-text">Escalating tensions in Persian Gulf region impacting trade routes</span>
+                        <span class="ticker-status">ESCALATING</span>
+                    </div>
+                    <div class="ticker-item">
+                        <span class="ticker-category">Fuel Prices:</span>
+                        <span class="ticker-text">Brent crude volatility continues as supply disruptions persist</span>
+                        <span class="ticker-status">ESCALATING</span>
+                    </div>
+                    <div class="ticker-item">
+                        <span class="ticker-category">Aviation Impact:</span>
+                        <span class="ticker-text">Major European airlines reducing long-haul flights due to jet fuel shortages</span>
+                        <span class="ticker-status">ESCALATING</span>
+                    </div>
+                    <div class="ticker-item">
+                        <span class="ticker-category">Regional Supply:</span>
+                        <span class="ticker-text">Supply chain disruptions affecting port operations across EU terminals</span>
+                        <span class="ticker-status">ESCALATING</span>
+                    </div>
+                    <div class="ticker-item">
+                        <span class="ticker-category">Diversification:</span>
+                        <span class="ticker-text">New import deals negotiated with US Gulf Coast and West African producers</span>
+                        <span class="ticker-status">NEW</span>
+                    </div>
+                    <!-- Repeat for continuous scroll effect -->
+                    <div class="ticker-item">
+                        <span class="ticker-category">Geopolitics:</span>
+                        <span class="ticker-text">Escalating tensions in Persian Gulf region impacting trade routes</span>
+                        <span class="ticker-status">ESCALATING</span>
+                    </div>
+                    <div class="ticker-item">
+                        <span class="ticker-category">Fuel Prices:</span>
+                        <span class="ticker-text">Brent crude volatility continues as supply disruptions persist</span>
+                        <span class="ticker-status">ESCALATING</span>
+                    </div>
+                </div>
+            </div>
 
-    <!-- ===========================================================
-         SECTION 1: OVERVIEW
-         TODO: Describe what this application does
-    =========================================================== -->
-    <section id="overview" class="card">
-      <span class="badge">Overview</span>
-      <h2>What is this project?</h2>
-      <p>
-        This is a prototype for a remotely accessible web application.
-        Multiple collaborators can view, edit, and contribute via the
-        <a href="https://github.com/BrainworksEasy/dev-app" target="_blank">GitHub repository</a>.
-      </p>
-      <p class="todo-note">&#9998; TODO: Replace this description with your project's purpose.</p>
-    </section>
-
-    <!-- ===========================================================
-         SECTION 2: FEATURES
-         TODO: List the main features you plan to build
-    =========================================================== -->
-    <section id="features" class="card">
-      <span class="badge">Features</span>
-      <h2>Planned Features</h2>
-      <ul class="feature-list">
-        <li class="done">&#10003; Project scaffold &amp; GitHub Pages setup</li>
-        <li class="done">&#10003; Shared notes with localStorage</li>
-        <li class="in-progress">&#9679; Task board (in progress)</li>
-        <li class="todo">&#9675; User authentication – TODO</li>
-        <li class="todo">&#9675; Real-time collaboration – TODO</li>
-        <li class="todo">&#9675; API integration – TODO</li>
-      </ul>
-      <p class="todo-note">&#9998; TODO: Add or remove features from this list.</p>
-    </section>
-
-    <!-- ===========================================================
-         SECTION 3: TASK BOARD
-         TODO: Use this to track what needs to be built
-    =========================================================== -->
-    <section id="tasks" class="card full-width">
-      <span class="badge">Task Board</span>
-      <h2>Task Board</h2>
-      <div class="board">
-
-        <div class="column">
-          <h3>&#128216; To Do</h3>
-          <ul id="todo-list" class="task-list">
-            <li>Design database schema</li>
-            <li>Set up API endpoints</li>
-            <li>Write unit tests</li>
-          </ul>
+            <!-- Key Metrics -->
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-label">Brent Crude</div>
+                    <div class="metric-value">$108.62</div>
+                    <div class="metric-detail">/barrel</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Jet Fuel (ARA)</div>
+                    <div class="metric-value">~$220</div>
+                    <div class="metric-detail">/barrel equivalent</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Hormuz Flow</div>
+                    <div class="metric-value">~0</div>
+                    <div class="metric-detail">mb/d (disrupted)</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">ARA Stocks</div>
+                    <div class="metric-value">542</div>
+                    <div class="metric-detail">kt (45 days cover)</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Diplomacy Status</div>
+                    <div class="metric-value" style="color: var(--critical);">STALLED</div>
+                    <div class="metric-detail">Negotiations paused</div>
+                </div>
+            </div>
         </div>
 
-        <div class="column">
-          <h3>&#9881; In Progress</h3>
-          <ul id="inprogress-list" class="task-list">
-            <li>Build task board UI</li>
-            <li>Style prototype pages</li>
-          </ul>
+        <!-- SECTION B: EU Jet Fuel Analysis -->
+        <h2 class="section-title">EU Jet Fuel Tonnage Analysis</h2>
+
+        <!-- Supply Balance -->
+        <div class="supply-balance-section">
+            <div class="subsection-title">Supply Balance</div>
+            <div class="supply-bar-container">
+                <div class="supply-label">
+                    <span>Daily EU Consumption: 217,600 t/d</span>
+                    <span>Domestic + Seaborne: 240,040 t/d (110%)</span>
+                </div>
+                <div class="supply-bar">
+                    <div class="bar-segment bar-consumption">
+                        <span>Demand<br>217.6k</span>
+                    </div>
+                    <div class="bar-segment bar-domestic">
+                        <span>Domestic<br>172k (79%)</span>
+                    </div>
+                    <div class="bar-segment bar-seaborne">
+                        <span>Seaborne<br>68k (31%)</span>
+                    </div>
+                </div>
+            </div>
+            <div class="supply-note">
+                Supply nominally adequate but logistics disruption and stock drawdown create real shortage risk. Domestic refinery capacity in "max jet mode" may not sustain peak summer demand without import buffer.
+            </div>
         </div>
 
-        <div class="column">
-          <h3>&#10003; Done</h3>
-          <ul id="done-list" class="task-list">
-            <li>Create GitHub repository</li>
-            <li>Enable GitHub Pages</li>
-            <li>Add index.html prototype</li>
-          </ul>
+        <!-- Charts: Import Sources & ARA Stock -->
+        <div class="charts-grid">
+            <!-- Import Source Breakdown -->
+            <div class="chart-container">
+                <div class="subsection-title">Import Source Breakdown (68,000 t/d)</div>
+                <div class="chart-wrapper">
+                    <canvas id="importSourceChart"></canvas>
+                </div>
+            </div>
+
+            <!-- ARA Stock Drawdown -->
+            <div class="chart-container">
+                <div class="subsection-title">ARA Stock Drawdown Forecast</div>
+                <div class="chart-wrapper">
+                    <canvas id="araStockChart"></canvas>
+                </div>
+            </div>
         </div>
 
-      </div>
-      <p class="todo-note">&#9998; TODO: Edit the tasks above directly in the HTML, or wire up app.js to manage them dynamically.</p>
-    </section>
+        <!-- Import Source Details -->
+        <div class="supply-balance-section">
+            <div class="subsection-title">Import Source Details</div>
+            <div class="import-source-list">
+                <div class="import-item">
+                    <div class="import-source">
+                        <span class="import-name">US Gulf Coast</span>
+                        <span class="import-change">▲ 4× pre-crisis</span>
+                    </div>
+                    <div class="import-stats">
+                        <div class="import-volume">
+                            <div class="import-value">27,200 t/d</div>
+                            <div class="import-percent">40%</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="import-item">
+                    <div class="import-source">
+                        <span class="import-name">India</span>
+                    </div>
+                    <div class="import-stats">
+                        <div class="import-volume">
+                            <div class="import-value">10,200 t/d</div>
+                            <div class="import-percent">15%</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="import-item">
+                    <div class="import-source">
+                        <span class="import-name">Intra-EU / Norway</span>
+                    </div>
+                    <div class="import-stats">
+                        <div class="import-volume">
+                            <div class="import-value">8,160 t/d</div>
+                            <div class="import-percent">12%</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="import-item">
+                    <div class="import-source">
+                        <span class="import-name">West Africa</span>
+                        <span class="import-change">• Record Nigeria exports</span>
+                    </div>
+                    <div class="import-stats">
+                        <div class="import-volume">
+                            <div class="import-value">8,160 t/d</div>
+                            <div class="import-percent">12%</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="import-item">
+                    <div class="import-source">
+                        <span class="import-name">North Africa</span>
+                    </div>
+                    <div class="import-stats">
+                        <div class="import-volume">
+                            <div class="import-value">6,800 t/d</div>
+                            <div class="import-percent">10%</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="import-item">
+                    <div class="import-source">
+                        <span class="import-name">Other</span>
+                    </div>
+                    <div class="import-stats">
+                        <div class="import-volume">
+                            <div class="import-value">5,440 t/d</div>
+                            <div class="import-percent">8%</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="import-item">
+                    <div class="import-source">
+                        <span class="import-name">Middle East</span>
+                        <span class="import-change">▼ 96% from pre-crisis</span>
+                    </div>
+                    <div class="import-stats">
+                        <div class="import-volume">
+                            <div class="import-value">1,360 t/d</div>
+                            <div class="import-percent">2%</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="import-item">
+                    <div class="import-source">
+                        <span class="import-name">Russia</span>
+                    </div>
+                    <div class="import-stats">
+                        <div class="import-volume">
+                            <div class="import-value">680 t/d</div>
+                            <div class="import-percent">1%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <!-- ===========================================================
-         SECTION 4: SHARED NOTES
-         TODO: Collaborators can type notes here (saved locally)
-    =========================================================== -->
-    <section id="notes" class="card">
-      <span class="badge">Shared Notes</span>
-      <h2>Shared Notes</h2>
-      <textarea id="notes-area" placeholder="Type your notes, ideas, or feedback here..."></textarea>
-      <button id="saveBtn">Save Notes</button>
-      <p id="saveMsg" class="msg"></p>
-      <p class="todo-note">&#9998; TODO: Connect to a backend or Firebase to sync notes across users in real time.</p>
-    </section>
+        <!-- Port Arrival Table -->
+        <div class="ports-section">
+            <div class="subsection-title">EU Port Arrivals & Capacity (Top 10 Ports)</div>
+            <table class="ports-table">
+                <thead>
+                    <tr>
+                        <th>Port</th>
+                        <th>Country</th>
+                        <th>Refinery (t/d)</th>
+                        <th>Import (t/d)</th>
+                        <th>Total (t/d)</th>
+                        <th>Tankers/day</th>
+                        <th>Serves</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="port-name">Rotterdam</td>
+                        <td>Netherlands</td>
+                        <td>18,456</td>
+                        <td>6,903</td>
+                        <td>25,359</td>
+                        <td>0.68</td>
+                        <td>Central EU</td>
+                        <td><span class="status-badge status-critical">Critical</span></td>
+                    </tr>
+                    <tr>
+                        <td class="port-name">Antwerp</td>
+                        <td>Belgium</td>
+                        <td>10,087</td>
+                        <td>3,000</td>
+                        <td>13,087</td>
+                        <td>0.38</td>
+                        <td>Central EU</td>
+                        <td><span class="status-badge status-critical">Critical</span></td>
+                    </tr>
+                    <tr>
+                        <td class="port-name">Le Havre</td>
+                        <td>France</td>
+                        <td>9,721</td>
+                        <td>4,100</td>
+                        <td>13,821</td>
+                        <td>0.41</td>
+                        <td>France, Spain</td>
+                        <td><span class="status-badge status-critical">Critical</span></td>
+                    </tr>
+                    <tr>
+                        <td class="port-name">Thames</td>
+                        <td>UK</td>
+                        <td>5,500</td>
+                        <td>1,300</td>
+                        <td>6,800</td>
+                        <td>0.21</td>
+                        <td>UK</td>
+                        <td><span class="status-badge status-critical">Critical</span></td>
+                    </tr>
+                    <tr>
+                        <td class="port-name">Hamburg</td>
+                        <td>Germany</td>
+                        <td>6,950</td>
+                        <td>1,728</td>
+                        <td>8,678</td>
+                        <td>0.27</td>
+                        <td>North EU</td>
+                        <td><span class="status-badge status-critical">Critical</span></td>
+                    </tr>
+                    <tr>
+                        <td class="port-name">Augusta</td>
+                        <td>Italy</td>
+                        <td>7,439</td>
+                        <td>1,700</td>
+                        <td>9,139</td>
+                        <td>0.27</td>
+                        <td>South EU</td>
+                        <td><span class="status-badge status-critical">Critical</span></td>
+                    </tr>
+                    <tr>
+                        <td class="port-name">Marseille</td>
+                        <td>France</td>
+                        <td>5,426</td>
+                        <td>1,000</td>
+                        <td>6,426</td>
+                        <td>0.20</td>
+                        <td>South EU</td>
+                        <td><span class="status-badge status-critical">Critical</span></td>
+                    </tr>
+                    <tr>
+                        <td class="port-name">Trieste</td>
+                        <td>Italy</td>
+                        <td>2,700</td>
+                        <td>700</td>
+                        <td>3,400</td>
+                        <td>0.11</td>
+                        <td>East EU</td>
+                        <td><span class="status-badge status-critical">Critical</span></td>
+                    </tr>
+                    <tr>
+                        <td class="port-name">Algeciras</td>
+                        <td>Spain</td>
+                        <td>4,648</td>
+                        <td>1,200</td>
+                        <td>5,848</td>
+                        <td>0.18</td>
+                        <td>South EU</td>
+                        <td><span class="status-badge status-critical">Critical</span></td>
+                    </tr>
+                    <tr>
+                        <td class="port-name">Gdansk</td>
+                        <td>Poland</td>
+                        <td>4,714</td>
+                        <td>1,080</td>
+                        <td>5,794</td>
+                        <td>0.17</td>
+                        <td>East EU</td>
+                        <td><span class="status-badge status-elevated">Elevated</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
-    <!-- ===========================================================
-         SECTION 5: TEAM
-         TODO: Add collaborator names, roles and GitHub profiles
-    =========================================================== -->
-    <section id="team" class="card">
-      <span class="badge">Team</span>
-      <h2>Team Members</h2>
-      <ul class="team-list">
-        <li>
-          <strong>BrainworksEasy</strong> &mdash; Project Owner
-          <a href="https://github.com/BrainworksEasy" target="_blank">&#128279; GitHub</a>
-        </li>
-        <li>
-          <strong>Collaborator A</strong> &mdash; Developer
-          <span class="todo-note">TODO: Add GitHub link</span>
-        </li>
-        <li>
-          <strong>Collaborator B</strong> &mdash; Designer
-          <span class="todo-note">TODO: Add GitHub link</span>
-        </li>
-      </ul>
-      <p class="todo-note">&#9998; TODO: Add your team members above.</p>
-    </section>
+        <!-- Tanker Pipeline Summary -->
+        <div class="tanker-pipeline">
+            <div class="subsection-title">Tanker Pipeline Summary</div>
+            <div class="pipeline-grid">
+                <div class="pipeline-card">
+                    <div class="pipeline-label">Est. Arrivals/Day</div>
+                    <div class="pipeline-value">~1.9</div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary);">tankers</div>
+                </div>
+                <div class="pipeline-card">
+                    <div class="pipeline-label">Tankers En Route</div>
+                    <div class="pipeline-value">~27</div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary);">to EU ports</div>
+                </div>
+                <div class="pipeline-card">
+                    <div class="pipeline-label">Average Cargo</div>
+                    <div class="pipeline-value">35k</div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary);">tonnes (MR class)</div>
+                </div>
+            </div>
+            <div class="pipeline-note">
+                Modelled estimates. Live AIS tracking requires Kpler/MarineTraffic subscription upgrade for real-time vessel position and ETA data.
+            </div>
+        </div>
 
-    <!-- ===========================================================
-         SECTION 6: QUICK LINKS
-    =========================================================== -->
-    <section class="card">
-      <span class="badge">Links</span>
-      <h2>Quick Links</h2>
-      <ul>
-        <li><a href="https://github.com/BrainworksEasy/dev-app" target="_blank">&#128196; GitHub Repository</a></li>
-        <li><a href="https://github.com/BrainworksEasy/dev-app/issues" target="_blank">&#128030; Issue Tracker</a></li>
-        <li><a href="https://github.com/BrainworksEasy/dev-app/wiki" target="_blank">&#128218; Project Wiki</a></li>
-        <li><a href="https://github.com/BrainworksEasy/dev-app/pulls" target="_blank">&#128260; Pull Requests</a></li>
-      </ul>
-    </section>
+        <!-- Tabs now have their own panels above -->
+    </div>
+    </div><!-- end panel-overview -->
 
-  </main>
+    <!-- Tab Panel: Crisis Timeline -->
+    <div class="tab-panel" id="panel-timeline">
+    <div class="container">
+        <h2 class="section-title">Crisis Timeline</h2>
+        <div class="card" style="padding: 2rem;">
+            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                    <div style="min-width: 100px; font-size: 0.8rem; color: var(--accent); font-weight: 600;">6 May 2026</div>
+                    <div style="width: 12px; height: 12px; border-radius: 50%; background: var(--critical); margin-top: 4px; flex-shrink: 0;"></div>
+                    <div><strong style="color: var(--text-primary);">CRITICAL: ARA stocks at 542kt</strong><br><span style="color: var(--text-secondary); font-size: 0.9rem;">Stock drawdown accelerating at ~2kt/day. Strategic reserve discussions underway across EU member states.</span></div>
+                </div>
+                <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                    <div style="min-width: 100px; font-size: 0.8rem; color: var(--accent); font-weight: 600;">3 May 2026</div>
+                    <div style="width: 12px; height: 12px; border-radius: 50%; background: var(--elevated); margin-top: 4px; flex-shrink: 0;"></div>
+                    <div><strong style="color: var(--text-primary);">Persian Gulf transit disruptions intensify</strong><br><span style="color: var(--text-secondary); font-size: 0.9rem;">Multiple tankers rerouting via Cape of Good Hope. Transit times increasing 10-14 days for ME-origin cargoes.</span></div>
+                </div>
+                <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                    <div style="min-width: 100px; font-size: 0.8rem; color: var(--accent); font-weight: 600;">28 Apr 2026</div>
+                    <div style="width: 12px; height: 12px; border-radius: 50%; background: var(--elevated); margin-top: 4px; flex-shrink: 0;"></div>
+                    <div><strong style="color: var(--text-primary);">EU refineries enter max jet mode</strong><br><span style="color: var(--text-secondary); font-size: 0.9rem;">Shell Pernis, TotalEnergies Antwerp confirm 15% uplift to jet fuel yield. Diesel/gasoline output reduced.</span></div>
+                </div>
+                <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                    <div style="min-width: 100px; font-size: 0.8rem; color: var(--accent); font-weight: 600;">23 Apr 2026</div>
+                    <div style="width: 12px; height: 12px; border-radius: 50%; background: var(--critical); margin-top: 4px; flex-shrink: 0;"></div>
+                    <div><strong style="color: var(--text-primary);">Strait of Hormuz blockade declared</strong><br><span style="color: var(--text-secondary); font-size: 0.9rem;">Iranian naval forces enforce exclusion zone. ~21% of global oil transit affected. Insurance premiums surge 400%.</span></div>
+                </div>
+                <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                    <div style="min-width: 100px; font-size: 0.8rem; color: var(--accent); font-weight: 600;">18 Apr 2026</div>
+                    <div style="width: 12px; height: 12px; border-radius: 50%; background: var(--info); margin-top: 4px; flex-shrink: 0;"></div>
+                    <div><strong style="color: var(--text-primary);">Tensions escalate in Persian Gulf</strong><br><span style="color: var(--text-secondary); font-size: 0.9rem;">Military buildup detected. EU aviation fuel procurement teams begin contingency planning.</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
 
-  <!-- ============================================================
-       FOOTER
-  ============================================================ -->
-  <footer>
-    <p>Dev App Prototype &mdash; Hosted on <a href="https://pages.github.com" target="_blank">GitHub Pages</a>
-    &bull; <a href="https://github.com/BrainworksEasy/dev-app" target="_blank">Contribute on GitHub</a></p>
-  </footer>
+    <!-- Tab Panel: News Digest -->
+    <div class="tab-panel" id="panel-news">
+    <div class="container">
+        <h2 class="section-title">News Digest</h2>
+        <div style="display: grid; gap: 1rem;">
+            <div class="card" style="padding: 1.5rem; border-left: 3px solid var(--critical);">
+                <div style="font-size: 0.75rem; color: var(--critical); text-transform: uppercase; font-weight: 600; margin-bottom: 0.5rem;">Critical Alert</div>
+                <div style="font-weight: 600; margin-bottom: 0.5rem;">ARA jet fuel stocks decline for 8th consecutive day</div>
+                <div style="font-size: 0.9rem; color: var(--text-secondary);">Amsterdam-Rotterdam-Antwerp hub inventories fell to 542kt, down from 552kt a week ago. Current drawdown rate of ~2kt/day puts 30-day stock cover at risk if imports don't recover.</div>
+                <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.75rem;">Sources: PJK International, Insights Global | 6 May 2026</div>
+            </div>
+            <div class="card" style="padding: 1.5rem; border-left: 3px solid var(--elevated);">
+                <div style="font-size: 0.75rem; color: var(--elevated); text-transform: uppercase; font-weight: 600; margin-bottom: 0.5rem;">Market Watch</div>
+                <div style="font-weight: 600; margin-bottom: 0.5rem;">EU refineries sustain max jet mode operations</div>
+                <div style="font-size: 0.9rem; color: var(--text-secondary);">European refiners maintaining elevated jet fuel yields (~15% above normal) to compensate for import shortfalls. This comes at the cost of diesel and gasoline output, which may create knock-on supply tensions.</div>
+                <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.75rem;">Sources: Reuters, Platts | 5 May 2026</div>
+            </div>
+            <div class="card" style="padding: 1.5rem; border-left: 3px solid var(--info);">
+                <div style="font-size: 0.75rem; color: var(--info); text-transform: uppercase; font-weight: 600; margin-bottom: 0.5rem;">Logistics</div>
+                <div style="font-weight: 600; margin-bottom: 0.5rem;">Cape of Good Hope rerouting adds 10-14 days transit</div>
+                <div style="font-size: 0.9rem; color: var(--text-secondary);">Tankers avoiding the Strait of Hormuz via the Cape route are adding significant transit time. Estimated 27 tankers currently en route to EU ports via alternative routes.</div>
+                <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.75rem;">Sources: MarineTraffic, Lloyd's List | 5 May 2026</div>
+            </div>
+            <div class="card" style="padding: 1.5rem; border-left: 3px solid var(--accent);">
+                <div style="font-size: 0.75rem; color: var(--accent); text-transform: uppercase; font-weight: 600; margin-bottom: 0.5rem;">Geopolitics</div>
+                <div style="font-weight: 600; margin-bottom: 0.5rem;">Diplomatic efforts to resolve Hormuz standoff stall</div>
+                <div style="font-size: 0.9rem; color: var(--text-secondary);">UN-brokered negotiations show limited progress. EU Foreign Affairs Council expected to discuss energy security measures at upcoming emergency session.</div>
+                <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.75rem;">Sources: GDELT, Al Jazeera | 4 May 2026</div>
+            </div>
+        </div>
+    </div>
+    </div>
 
-  <script src="app.js"></script>
+    <!-- Tab Panel: Vessel Tracking -->
+    <div class="tab-panel" id="panel-tracking">
+    <div class="container">
+        <h2 class="section-title">Vessel Tracking</h2>
+        <div class="card" style="padding: 1.5rem;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                <div style="background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 2rem; font-weight: 700; color: var(--accent);">27</div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary);">Tankers En Route to EU</div>
+                </div>
+                <div style="background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 2rem; font-weight: 700; color: var(--info);">1.9/day</div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary);">Avg Daily Arrivals</div>
+                </div>
+                <div style="background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 2rem; font-weight: 700; color: var(--elevated);">68,000 t</div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary);">Daily Import Volume</div>
+                </div>
+            </div>
+            <div style="background: var(--bg-primary); border-radius: 8px; padding: 1.5rem; text-align: center; color: var(--text-secondary);">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🗺️</div>
+                <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem;">Live Vessel Map</div>
+                <div style="font-size: 0.9rem; max-width: 500px; margin: 0 auto;">Vessel tracking map requires AIS data integration. Current prototype uses modelled estimates from IATA/IEA/Eurostat data. Upgrade to MarineTraffic or Kpler API for real-time vessel positions.</div>
+                <div style="margin-top: 1rem; padding: 0.5rem 1rem; background: var(--bg-tertiary); border-radius: 6px; display: inline-block; font-size: 0.8rem; color: var(--accent);">Data source: Tier 2+ required ($5-15k/yr)</div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Tab Panel: Scenario Analysis -->
+    <div class="tab-panel" id="panel-scenarios">
+    <div class="container">
+        <h2 class="section-title">Scenario Analysis</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+            <div class="card" style="padding: 1.5rem; border-top: 3px solid var(--normal);">
+                <div style="font-weight: 700; font-size: 1.1rem; color: var(--normal); margin-bottom: 1rem;">Best Case: Diplomatic Resolution</div>
+                <div style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6;">
+                    <strong>Trigger:</strong> Hormuz reopens within 2 weeks<br>
+                    <strong>Impact:</strong> ME imports resume at 80% within 30 days<br>
+                    <strong>ARA Stocks:</strong> Stabilise at ~510kt, rebuild by Q3<br>
+                    <strong>Jet Fuel Price:</strong> +15-20% above pre-crisis, normalising over 60 days<br>
+                    <strong>Probability:</strong> 20%
+                </div>
+            </div>
+            <div class="card" style="padding: 1.5rem; border-top: 3px solid var(--elevated);">
+                <div style="font-weight: 700; font-size: 1.1rem; color: var(--elevated); margin-bottom: 1rem;">Base Case: Prolonged Disruption</div>
+                <div style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6;">
+                    <strong>Trigger:</strong> Blockade continues 3-6 months<br>
+                    <strong>Impact:</strong> Permanent rerouting via Cape, alternative suppliers fill 60% of gap<br>
+                    <strong>ARA Stocks:</strong> Draw to 400kt, trigger strategic reserve releases<br>
+                    <strong>Jet Fuel Price:</strong> +40-60% sustained premium<br>
+                    <strong>Probability:</strong> 55%
+                </div>
+            </div>
+            <div class="card" style="padding: 1.5rem; border-top: 3px solid var(--critical);">
+                <div style="font-weight: 700; font-size: 1.1rem; color: var(--critical); margin-bottom: 1rem;">Worst Case: Escalation & Contagion</div>
+                <div style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6;">
+                    <strong>Trigger:</strong> Conflict widens, Suez also impacted<br>
+                    <strong>Impact:</strong> Both ME and North African supply routes compromised<br>
+                    <strong>ARA Stocks:</strong> Below 300kt, rationing likely<br>
+                    <strong>Jet Fuel Price:</strong> +100-150%, flight cancellations<br>
+                    <strong>Probability:</strong> 25%
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Tab Panel: Fuel Forecast -->
+    <div class="tab-panel" id="panel-forecast">
+    <div class="container">
+        <h2 class="section-title">Fuel Forecast</h2>
+        <div class="card" style="padding: 1.5rem; margin-bottom: 1.5rem;">
+            <div style="font-weight: 600; margin-bottom: 1rem;">30-Day EU Jet Fuel Supply Forecast</div>
+            <canvas id="forecastChart" height="300"></canvas>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+            <div class="card" style="padding: 1.25rem;">
+                <div style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 0.5rem;">7-Day Outlook</div>
+                <div style="font-size: 1.5rem; font-weight: 700; color: var(--critical);">TIGHTENING</div>
+                <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem;">ARA stocks projected to fall to ~528kt. Import pipeline shows 3 tankers arriving this week.</div>
+            </div>
+            <div class="card" style="padding: 1.25rem;">
+                <div style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 0.5rem;">14-Day Outlook</div>
+                <div style="font-size: 1.5rem; font-weight: 700; color: var(--critical);">CRITICAL</div>
+                <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem;">If drawdown continues at current pace, stocks approach 500kt threshold. Strategic reserve discussions expected.</div>
+            </div>
+            <div class="card" style="padding: 1.25rem;">
+                <div style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 0.5rem;">30-Day Outlook</div>
+                <div style="font-size: 1.5rem; font-weight: 700; color: var(--elevated);">UNCERTAIN</div>
+                <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem;">Depends heavily on geopolitical resolution. Base case: stocks at 460-480kt with alternative supply chains partially established.</div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <div class="footer-left">
+            <div class="footer-item">
+                <span class="confidence-indicator confidence-high"></span>
+                News: HIGH
+            </div>
+            <div class="footer-item">
+                <span class="confidence-indicator confidence-low"></span>
+                Vessel Tracking: LOW (modelled)
+            </div>
+            <div class="footer-item">
+                <span class="confidence-indicator confidence-high"></span>
+                Stock Levels: HIGH
+            </div>
+            <div class="footer-item">
+                <span class="confidence-indicator confidence-medium"></span>
+                Scenario Analysis: UP TO DATE
+            </div>
+        </div>
+        <button class="roadmap-toggle" id="roadmapToggle">Platform Roadmap ▼</button>
+    </div>
+
+    <!-- Platform Roadmap (Collapsible) -->
+    <div class="container" style="padding-top: 0;">
+        <div class="roadmap-content" id="roadmapContent">
+            <div class="roadmap-item">
+                <div class="roadmap-tier">News Feed (HIGH)</div>
+                <div class="roadmap-description">Manual curation + RSS feeds from Bloomberg, Reuters, S&P Global; 3-4 updates/day. Full chain-of-custody on source reliability.</div>
+            </div>
+            <div class="roadmap-item">
+                <div class="roadmap-tier">Vessel Tracking (LOW)</div>
+                <div class="roadmap-description">Currently modelled from port schedules and typical voyage patterns. Roadmap: Integrate Kpler/MarineTraffic API for live AIS position, draft surveys, real port delays (Q3 2026).</div>
+            </div>
+            <div class="roadmap-item">
+                <div class="roadmap-tier">Stock Levels (HIGH)</div>
+                <div class="roadmap-description">ARA stocks from official weekly CEPSA/Intercontinental Exchange reports. Lag ~3 days. Upstream refinery inventory aggregation planned (Q2 2026).</div>
+            </div>
+            <div class="roadmap-item">
+                <div class="roadmap-tier">Supply Forecasts (MEDIUM)</div>
+                <div class="roadmap-description">Static model (refinery capacity + known import contracts). Roadmap: Machine learning on historical shipping patterns, weather delays, geopolitical risk scoring (Q4 2026).</div>
+            </div>
+            <div class="roadmap-item">
+                <div class="roadmap-tier">Scenario Analysis (UP TO DATE)</div>
+                <div class="roadmap-description">Strategic modeling: supply restoration paths (diplomacy, sanctions relief), demand destruction (airline cutbacks), emergency reserves release. Updated weekly with client inputs.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize charts
+        const ctxImportSource = document.getElementById('importSourceChart').getContext('2d');
+        const importSourceChart = new Chart(ctxImportSource, {
+            type: 'doughnut',
+            data: {
+                labels: ['US Gulf Coast (40%)', 'India (15%)', 'Intra-EU/Norway (12%)', 'West Africa (12%)', 'North Africa (10%)', 'Other (8%)', 'Middle East (2%)', 'Russia (1%)'],
+                datasets: [{
+                    data: [40, 15, 12, 12, 10, 8, 2, 1],
+                    backgroundColor: [
+                        '#3b82f6',
+                        '#06b6d4',
+                        '#8b5cf6',
+                        '#ec4899',
+                        '#f59e0b',
+                        '#6366f1',
+                        '#ef4444',
+                        '#64748b'
+                    ],
+                    borderColor: '#242f3e',
+                    borderWidth: 2,
+                    hoverOffset: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#9ca3af',
+                            font: { size: 12 },
+                            padding: 15,
+                            usePointStyle: true
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: '#1a2332',
+                        borderColor: '#2a3a4a',
+                        borderWidth: 1,
+                        titleColor: '#e5e7eb',
+                        bodyColor: '#9ca3af',
+                        padding: 12,
+                        displayColors: true
+                    }
+                }
+            }
+        });
+
+        const ctxAraStock = document.getElementById('araStockChart').getContext('2d');
+        const araStockChart = new Chart(ctxAraStock, {
+            type: 'line',
+            data: {
+                labels: ['May 1', 'May 5', 'May 10', 'May 15', 'May 20', 'May 25', 'May 30', 'Jun 4', 'Jun 9', 'Jun 14', 'Jun 19', 'Jun 24'],
+                datasets: [
+                    {
+                        label: 'ARA Stock Level',
+                        data: [552, 542, 512, 482, 452, 422, 392, 362, 332, 302, 272, 242],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#3b82f6',
+                        pointBorderColor: '#1a2332',
+                        pointBorderWidth: 2,
+                        pointHoverRadius: 7
+                    },
+                    {
+                        label: 'Shortage Threshold (23-day cover)',
+                        data: [310, 310, 310, 310, 310, 310, 310, 310, 310, 310, 310, 310],
+                        borderColor: '#ef4444',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        fill: false,
+                        pointRadius: 0,
+                        tension: 0
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#9ca3af',
+                            font: { size: 12 },
+                            padding: 15,
+                            usePointStyle: true
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: '#1a2332',
+                        borderColor: '#2a3a4a',
+                        borderWidth: 1,
+                        titleColor: '#e5e7eb',
+                        bodyColor: '#9ca3af',
+                        padding: 12
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: 200,
+                        max: 600,
+                        ticks: {
+                            color: '#9ca3af',
+                            font: { size: 11 },
+                            callback: function(value) {
+                                return value + ' kt';
+                            }
+                        },
+                        grid: {
+                            color: '#2a3a4a',
+                            drawBorder: false
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: '#9ca3af',
+                            font: { size: 11 }
+                        },
+                        grid: {
+                            color: '#2a3a4a',
+                            drawBorder: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // Navigation Tab Handler
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                const tabId = this.getAttribute('data-tab');
+                document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+                document.getElementById('panel-' + tabId).classList.add('active');
+                // Initialize forecast chart when that tab is shown
+                if (tabId === 'forecast' && !window.forecastChartInit) {
+                    window.forecastChartInit = true;
+                    const ctx = document.getElementById('forecastChart');
+                    if (ctx) {
+                        new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: ['Day 1','Day 5','Day 10','Day 15','Day 20','Day 25','Day 30'],
+                                datasets: [{
+                                    label: 'ARA Stock (kt)',
+                                    data: [542, 532, 518, 505, 490, 475, 462],
+                                    borderColor: '#ef4444',
+                                    backgroundColor: 'rgba(239,68,68,0.1)',
+                                    fill: true,
+                                    tension: 0.3
+                                }, {
+                                    label: 'Critical Threshold',
+                                    data: [500, 500, 500, 500, 500, 500, 500],
+                                    borderColor: '#f59e0b',
+                                    borderDash: [5, 5],
+                                    pointRadius: 0,
+                                    fill: false
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: { legend: { labels: { color: '#e5e7eb' } } },
+                                scales: {
+                                    x: { ticks: { color: '#9ca3af' }, grid: { color: '#2a3a4a' } },
+                                    y: { ticks: { color: '#9ca3af' }, grid: { color: '#2a3a4a' }, min: 400, max: 560 }
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+        });
+
+        // Platform Roadmap Toggle
+        document.getElementById('roadmapToggle').addEventListener('click', function() {
+            const content = document.getElementById('roadmapContent');
+            content.classList.toggle('active');
+            this.textContent = content.classList.contains('active') ? 'Platform Roadmap ▲' : 'Platform Roadmap ▼';
+        });
+
+        // Smooth news ticker scroll (reset at end for continuous effect)
+        const ticker = document.getElementById('newsTicker');
+        const tickerItems = document.querySelector('.ticker-items');
+        let scrollPos = 0;
+
+        setInterval(() => {
+            scrollPos += 1;
+            if (scrollPos > tickerItems.scrollHeight / 2) {
+                scrollPos = 0;
+            }
+            ticker.scrollTop = scrollPos;
+        }, 50);
+    </script>
 </body>
 </html>
