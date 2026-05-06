@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dev App</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Dev App</h1>
+    <p class="subtitle">A remotely accessible development application</p>
+  </header>
+  <main>
+    <section class="card">
+      <h2>Welcome</h2>
+      <p>This development page is accessible by multiple people remotely.</p>
+    </section>
+    <section class="card">
+      <h2>Shared Notes</h2>
+      <textarea id="notes" placeholder="Type your notes here..."></textarea>
+      <button id="saveBtn">Save Notes</button>
+      <p id="saveMsg" class="msg"></p>
+    </section>
+    <section class="card">
+      <h2>Quick Links</h2>
+      <ul>
+        <li><a href="https://github.com/BrainworksEasy/dev-app" target="_blank">GitHub Repository</a></li>
+        <li><a href="https://github.com/BrainworksEasy/dev-app/issues" target="_blank">Issue Tracker</a></li>
+      </ul>
+    </section>
+  </main>
+  <footer>
+    <p>Dev App - Open Source Development Platform</p>
+  </footer>
+  <script src="app.js"></script>
+</body>
+</html>
