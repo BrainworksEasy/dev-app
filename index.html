@@ -3,36 +3,165 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dev App</title>
+  <title>Dev App – Prototype</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+
+  <!-- ============================================================
+       HEADER – Edit the app name and tagline here
+  ============================================================ -->
   <header>
     <h1>Dev App</h1>
-    <p class="subtitle">A remotely accessible development application</p>
+    <p class="subtitle">Collaborative Development Prototype &mdash; Open for contributions</p>
   </header>
+
+  <!-- ============================================================
+       NAVIGATION – TODO: Add links to your main sections
+  ============================================================ -->
+  <nav class="prototype-nav">
+    <a href="#overview">Overview</a>
+    <a href="#features">Features</a>
+    <a href="#tasks">Task Board</a>
+    <a href="#notes">Shared Notes</a>
+    <a href="#team">Team</a>
+  </nav>
+
   <main>
-    <section class="card">
-      <h2>Welcome</h2>
-      <p>This development page is accessible by multiple people remotely.</p>
+
+    <!-- ===========================================================
+         SECTION 1: OVERVIEW
+         TODO: Describe what this application does
+    =========================================================== -->
+    <section id="overview" class="card">
+      <span class="badge">Overview</span>
+      <h2>What is this project?</h2>
+      <p>
+        This is a prototype for a remotely accessible web application.
+        Multiple collaborators can view, edit, and contribute via the
+        <a href="https://github.com/BrainworksEasy/dev-app" target="_blank">GitHub repository</a>.
+      </p>
+      <p class="todo-note">&#9998; TODO: Replace this description with your project's purpose.</p>
     </section>
-    <section class="card">
+
+    <!-- ===========================================================
+         SECTION 2: FEATURES
+         TODO: List the main features you plan to build
+    =========================================================== -->
+    <section id="features" class="card">
+      <span class="badge">Features</span>
+      <h2>Planned Features</h2>
+      <ul class="feature-list">
+        <li class="done">&#10003; Project scaffold &amp; GitHub Pages setup</li>
+        <li class="done">&#10003; Shared notes with localStorage</li>
+        <li class="in-progress">&#9679; Task board (in progress)</li>
+        <li class="todo">&#9675; User authentication – TODO</li>
+        <li class="todo">&#9675; Real-time collaboration – TODO</li>
+        <li class="todo">&#9675; API integration – TODO</li>
+      </ul>
+      <p class="todo-note">&#9998; TODO: Add or remove features from this list.</p>
+    </section>
+
+    <!-- ===========================================================
+         SECTION 3: TASK BOARD
+         TODO: Use this to track what needs to be built
+    =========================================================== -->
+    <section id="tasks" class="card full-width">
+      <span class="badge">Task Board</span>
+      <h2>Task Board</h2>
+      <div class="board">
+
+        <div class="column">
+          <h3>&#128216; To Do</h3>
+          <ul id="todo-list" class="task-list">
+            <li>Design database schema</li>
+            <li>Set up API endpoints</li>
+            <li>Write unit tests</li>
+          </ul>
+        </div>
+
+        <div class="column">
+          <h3>&#9881; In Progress</h3>
+          <ul id="inprogress-list" class="task-list">
+            <li>Build task board UI</li>
+            <li>Style prototype pages</li>
+          </ul>
+        </div>
+
+        <div class="column">
+          <h3>&#10003; Done</h3>
+          <ul id="done-list" class="task-list">
+            <li>Create GitHub repository</li>
+            <li>Enable GitHub Pages</li>
+            <li>Add index.html prototype</li>
+          </ul>
+        </div>
+
+      </div>
+      <p class="todo-note">&#9998; TODO: Edit the tasks above directly in the HTML, or wire up app.js to manage them dynamically.</p>
+    </section>
+
+    <!-- ===========================================================
+         SECTION 4: SHARED NOTES
+         TODO: Collaborators can type notes here (saved locally)
+    =========================================================== -->
+    <section id="notes" class="card">
+      <span class="badge">Shared Notes</span>
       <h2>Shared Notes</h2>
-      <textarea id="notes" placeholder="Type your notes here..."></textarea>
+      <textarea id="notes-area" placeholder="Type your notes, ideas, or feedback here..."></textarea>
       <button id="saveBtn">Save Notes</button>
       <p id="saveMsg" class="msg"></p>
+      <p class="todo-note">&#9998; TODO: Connect to a backend or Firebase to sync notes across users in real time.</p>
     </section>
+
+    <!-- ===========================================================
+         SECTION 5: TEAM
+         TODO: Add collaborator names, roles and GitHub profiles
+    =========================================================== -->
+    <section id="team" class="card">
+      <span class="badge">Team</span>
+      <h2>Team Members</h2>
+      <ul class="team-list">
+        <li>
+          <strong>BrainworksEasy</strong> &mdash; Project Owner
+          <a href="https://github.com/BrainworksEasy" target="_blank">&#128279; GitHub</a>
+        </li>
+        <li>
+          <strong>Collaborator A</strong> &mdash; Developer
+          <span class="todo-note">TODO: Add GitHub link</span>
+        </li>
+        <li>
+          <strong>Collaborator B</strong> &mdash; Designer
+          <span class="todo-note">TODO: Add GitHub link</span>
+        </li>
+      </ul>
+      <p class="todo-note">&#9998; TODO: Add your team members above.</p>
+    </section>
+
+    <!-- ===========================================================
+         SECTION 6: QUICK LINKS
+    =========================================================== -->
     <section class="card">
+      <span class="badge">Links</span>
       <h2>Quick Links</h2>
       <ul>
-        <li><a href="https://github.com/BrainworksEasy/dev-app" target="_blank">GitHub Repository</a></li>
-        <li><a href="https://github.com/BrainworksEasy/dev-app/issues" target="_blank">Issue Tracker</a></li>
+        <li><a href="https://github.com/BrainworksEasy/dev-app" target="_blank">&#128196; GitHub Repository</a></li>
+        <li><a href="https://github.com/BrainworksEasy/dev-app/issues" target="_blank">&#128030; Issue Tracker</a></li>
+        <li><a href="https://github.com/BrainworksEasy/dev-app/wiki" target="_blank">&#128218; Project Wiki</a></li>
+        <li><a href="https://github.com/BrainworksEasy/dev-app/pulls" target="_blank">&#128260; Pull Requests</a></li>
       </ul>
     </section>
+
   </main>
+
+  <!-- ============================================================
+       FOOTER
+  ============================================================ -->
   <footer>
-    <p>Dev App - Open Source Development Platform</p>
+    <p>Dev App Prototype &mdash; Hosted on <a href="https://pages.github.com" target="_blank">GitHub Pages</a>
+    &bull; <a href="https://github.com/BrainworksEasy/dev-app" target="_blank">Contribute on GitHub</a></p>
   </footer>
+
   <script src="app.js"></script>
 </body>
 </html>
